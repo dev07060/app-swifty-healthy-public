@@ -1,0 +1,34 @@
+{
+  // --- 일반 편집기 설정 ---
+  "editor.tabSize": 2, // 탭 크기를 2칸으로 설정
+  "files.autoSave": "onFocusChange", // 다른 창으로 포커스가 이동할 때 자동 저장
+  "explorer.compactFolders": false, // 탐색기에서 중첩 폴더 구조를 명확하게 표시
+  "workbench.editor.labelFormat": "short", // 탭에 표시되는 파일 경로를 짧게
+
+  // --- 1. 120자 텍스트 제한 ---
+  "editor.wordWrap": "bounded", // 'wordWrapColumn' 기준으로 줄 바꿈
+  "editor.wordWrapColumn": 120, // 줄 바꿈 기준을 120자로 설정
+  "editor.rulers": [
+    120
+  ], // 120자 위치에 세로줄(눈금자) 표시
+
+  // --- 2 & 3. 저장 시 자동 포맷 및 import 정리 ---
+  "editor.formatOnSave": true, // 저장 시 자동으로 코드 포맷팅
+  "editor.defaultFormatter": "esbenp.prettier-vscode", // Prettier를 기본 포맷터로 사용 (Prettier 확장 프로그램 필요)
+  "editor.codeActionsOnSave": {
+    // 저장 시 코드 액션 실행
+    "source.organizeImports": "explicit", // 사용하지 않는 import 문 자동 삭제 및 정렬
+    "source.fixAll.eslint": "explicit" // ESLint 오류 자동 수정 (ESLint 확장 프로그램 필요)
+  },
+
+  // --- 4. React Native (JSX/TSX) 추천 설정 ---
+  "emmet.includeLanguages": {
+    // JSX/TSX 파일에서도 Emmet(HTML 축약) 사용
+    "javascript": "javascriptreact",
+    "typescript": "typescriptreact"
+  },
+  "javascript.updateImportsOnFileMove.enabled": "always", // 파일 이동 시 import 경로 자동 업데이트
+  "typescript.updateImportsOnFileMove.enabled": "always", // (TypeScript 사용 시) 파일 이동 시 import 경로 자동 업데이트
+  "javascript.suggest.autoImports": true, // 자동 import 제안
+  "typescript.suggest.autoImports": true // (TypeScript 사용 시) 자동 import 제안
+}
