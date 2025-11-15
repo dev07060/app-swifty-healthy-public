@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
   Image,
+  type ImageErrorEventData,
+  type NativeSyntheticEvent,
   StyleSheet,
   Text,
   View,
@@ -10,12 +13,25 @@ import {
 import { ImageCache } from '../utils/imageCache';
 import { ImageMemoryManager } from '../utils/imageProcessing';
 
+// Check if imageUri is valid
+const isValidImageUri = (uri: string): boolean => {
+  if (!uri) return false;
+  // Check for common image URI patterns
+  return (
+    uri.startsWith('file://') ||
+    uri.startsWith('content://') ||
+    uri.startsWith('http://') ||
+    uri.startsWith('https://') ||
+    uri.startsWith('data:image/')
+  );
+};
+
 interface ImageBackgroundContainerProps {
   imageUri: string;
   children: React.ReactNode;
   overlayOpacity?: number;
   onImageLoad?: () => void;
-  onImageError?: (error: any) => void;
+  onImageError?: (error: ImageErrorEventData) => void;
   enableCompression?: boolean;
   cacheKey?: string;
 }
@@ -37,22 +53,15 @@ export function ImageBackgroundContainer({
     width: number;
     height: number;
   } | null>(null);
-  const [processedImageUri, setProcessedImageUri] = useState<string | null>(null);
-  const [memoryUsage, setMemoryUsage] = useState(ImageMemoryManager.getMemoryUsage());
+  const [processedImageUri, setProcessedImageUri] = useState<string | null>(
+    null,
+  );
+  const [memoryUsage, setMemoryUsage] = useState(
+    ImageMemoryManager.getMemoryUsage(),
+  );
 
   // Debug logging
   console.log('ImageBackgroundContainer - imageUri:', imageUri);
-
-  // Check if imageUri is valid
-  const isValidImageUri = (uri: string): boolean => {
-    if (!uri) return false;
-    // Check for common image URI patterns
-    return uri.startsWith('file://') ||
-      uri.startsWith('content://') ||
-      uri.startsWith('http://') ||
-      uri.startsWith('https://') ||
-      uri.startsWith('data:image/');
-  };
 
   // Process image with caching and compression
   useEffect(() => {
@@ -63,7 +72,10 @@ export function ImageBackgroundContainer({
     }
 
     if (!isValidImageUri(imageUri)) {
-      console.log('ImageBackgroundContainer - Invalid imageUri format:', imageUri);
+      console.log(
+        'ImageBackgroundContainer - Invalid imageUri format:',
+        imageUri,
+      );
       setImageError(true);
       setImageLoading(false);
       return;
@@ -80,7 +92,7 @@ export function ImageBackgroundContainer({
           priority: 'high', // Background images are high priority
           maxWidth: screenWidth * 2, // Support high DPI
           maxHeight: screenHeight * 2,
-          maxSizeKB: 2048 // 2MB limit for background images
+          maxSizeKB: 2048, // 2MB limit for background images
         });
 
         setProcessedImageUri(cached.uri);
@@ -90,19 +102,21 @@ export function ImageBackgroundContainer({
           original: imageUri,
           processed: cached.uri,
           fromCache: cached.fromCache,
-          size: (cached.size / 1024).toFixed(2) + 'KB'
+          size: `${(cached.size / 1024).toFixed(2)}KB`,
         });
-
       } catch (error) {
-        console.error('ImageBackgroundContainer - Image processing failed:', error);
+        console.error(
+          'ImageBackgroundContainer - Image processing failed:',
+          error,
+        );
         setImageError(true);
         setImageLoading(false);
-        onImageError?.(error);
+        onImageError?.(error as ImageErrorEventData);
       }
     };
 
     processImage();
-  }, [imageUri, enableCompression, cacheKey]);
+  }, [imageUri, enableCompression, cacheKey, onImageError]);
 
   // Monitor memory usage
   useEffect(() => {
@@ -124,19 +138,23 @@ export function ImageBackgroundContainer({
     };
   }, [processedImageUri, imageUri, cacheKey]);
 
-  const handleImageLoad = (event: any) => {
+  const handleImageLoad = (
+    event: NativeSyntheticEvent<{ source: { width: number; height: number } }>,
+  ) => {
     const { width, height } = event.nativeEvent.source;
     setImageDimensions({ width, height });
     setImageLoading(false);
     onImageLoad?.();
   };
 
-  const handleImageError = (error: any) => {
+  const handleImageError = (
+    error: NativeSyntheticEvent<ImageErrorEventData>,
+  ) => {
     console.log('ImageBackgroundContainer - Image load error:', error);
     console.log('ImageBackgroundContainer - Failed imageUri:', imageUri);
     setImageError(true);
     setImageLoading(false);
-    onImageError?.(error);
+    onImageError?.(error.nativeEvent);
   };
 
   // Calculate image display dimensions - width always fits screen, height maintains aspect ratio
@@ -221,9 +239,7 @@ export function ImageBackgroundContainer({
       <View style={[styles.overlay, { opacity: overlayOpacity }]} />
 
       {/* Children Content */}
-      <View style={styles.contentContainer}>
-        {children}
-      </View>
+      <View style={styles.contentContainer}>{children}</View>
     </View>
   );
 }

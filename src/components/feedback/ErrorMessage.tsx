@@ -1,12 +1,19 @@
 import type React from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  type ViewStyle,
+} from 'react-native';
 import { type AppError, ErrorHandlingUtils } from '../../utils/errorHandling';
 
 interface ErrorMessageProps {
   error: AppError;
   onRetry?: () => void;
   onDismiss?: () => void;
-  style?: any;
+  style?: ViewStyle;
   showDetails?: boolean;
 }
 

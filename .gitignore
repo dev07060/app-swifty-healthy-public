@@ -17,3 +17,6 @@ docs/**
 .swc
 .DS_Store
 *.ait
+
+.kiro/
+.idea/

@@ -1,9 +1,6 @@
-import type { NavigationProps } from '@granite-js/react-native';
 import React, { useState } from 'react';
 import {
-  Platform,
   StatusBar,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -21,6 +18,7 @@ import {
 } from '../../hooks/useApiMutations';
 import type { GeminiExerciseResponse, GeminiFoodResponse } from '../../types';
 import { ErrorHandlingUtils } from '../../utils/errorHandling';
+import { styles } from './styles';
 
 interface EnhancedAnalysisScreenProps {
   navigation: any;
@@ -39,6 +37,13 @@ export function EnhancedAnalysisScreen({
 }: EnhancedAnalysisScreenProps) {
   const { imageUri, analysisResult, entryType } = route.params;
 
+  // Debug: Log the analysis result
+  console.log('🔍 Enhanced Analysis Screen - Entry Type:', entryType);
+  console.log('🔍 Enhanced Analysis Screen - Analysis Result:', JSON.stringify(analysisResult, null, 2));
+  if (entryType === 'food') {
+    console.log('🔍 Food ingredients:', (analysisResult as GeminiFoodResponse).ingredients);
+  }
+
   const foodMutation = useLogFoodMutation();
   const exerciseMutation = useLogExerciseMutation();
 
@@ -50,6 +55,7 @@ export function EnhancedAnalysisScreen({
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showExitConfirmation, setShowExitConfirmation] = useState(false);
+  const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
 
   const handleGoBack = () => {
     if (
@@ -72,7 +78,14 @@ export function EnhancedAnalysisScreen({
     setShowExitConfirmation(false);
   };
 
-  const handleSave = async () => {
+  const handleSaveClick = () => {
+    // Show confirmation dialog before saving
+    setShowSaveConfirmation(true);
+  };
+
+  const handleConfirmSave = async () => {
+    setShowSaveConfirmation(false);
+
     if (foodMutation.isPending || exerciseMutation.isPending) return;
 
     // A static userKey for now, this should come from user session state
@@ -81,14 +94,18 @@ export function EnhancedAnalysisScreen({
     try {
       if (entryType === 'food') {
         const foodData = modifiedData as GeminiFoodResponse;
-        await foodMutation.mutateAsync({
+        const payload = {
           userKey,
           isHealthy: foodData.isHealthy,
-          mainIngredients: foodData.mainIngredients,
+          ingredients: foodData.ingredients,
           estimatedCalories: foodData.estimatedCalories,
           mealType: foodData.mealType,
           date: foodData.date,
-        });
+        };
+        console.log('💾 Saving food data - Modified Data:', JSON.stringify(foodData, null, 2));
+        console.log('💾 Saving food data - Ingredients:', foodData.ingredients);
+        console.log('💾 Saving food data - Payload:', JSON.stringify(payload, null, 2));
+        await foodMutation.mutateAsync(payload);
       } else {
         const exerciseData = modifiedData as GeminiExerciseResponse;
         await exerciseMutation.mutateAsync({
@@ -121,6 +138,13 @@ export function EnhancedAnalysisScreen({
     }
   };
 
+  const handleEditFromDialog = () => {
+    setShowSaveConfirmation(false);
+    setIsEditing(true);
+  };
+
+
+
   const handleItemEdit = (key: string, value: string) => {
     // Update the modified data with the new value
     setModifiedData((prevData) => {
@@ -143,15 +167,16 @@ export function EnhancedAnalysisScreen({
         const numericValue = numericMatch ? Number(numericMatch[1]) : 0;
         (newData as GeminiFoodResponse & GeminiExerciseResponse)[key] =
           numericValue;
-      } else if (key === 'mainIngredients') {
-        (newData as GeminiFoodResponse & GeminiExerciseResponse)[key] = value
-          .split(',')
-          .map((item) => item.trim());
+      } else if (key === 'ingredients') {
+        const ingredientNames = value.split(',').map((item) => item.trim());
+        (newData as GeminiFoodResponse & GeminiExerciseResponse)[key] =
+          ingredientNames.map((name) => ({ name, color: 'teal' }));
       } else if (key === 'isHealthy') {
         (newData as GeminiFoodResponse & GeminiExerciseResponse)[key] =
           value.toLowerCase() === 'true' || value === '건강함';
       } else {
-        // (newData as GeminiFoodResponse & GeminiExerciseResponse)[key] = value;
+        // Handle other string fields like mealType, exerciseType, date, etc.
+        (newData as any)[key] = value;
       }
 
       return newData;
@@ -219,7 +244,7 @@ export function EnhancedAnalysisScreen({
         <View style={styles.footerContent}>
           <TouchableOpacity
             style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
-            onPress={handleSave}
+            onPress={handleSaveClick}
             disabled={isSaving}
           >
             <Text
@@ -228,7 +253,7 @@ export function EnhancedAnalysisScreen({
                 isSaving && styles.saveButtonTextDisabled,
               ]}
             >
-              {isSaving ? '저장 중...' : '저장'}
+              {isSaving ? '저장 중...' : '저장하기'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -256,7 +281,7 @@ export function EnhancedAnalysisScreen({
               } else {
                 exerciseMutation.reset();
               }
-              handleSave();
+              handleConfirmSave();
             }}
             onDismiss={() => {
               if (entryType === 'food') {
@@ -282,148 +307,20 @@ export function EnhancedAnalysisScreen({
           isDestructive={true}
         />
       )}
+
+      {/* Save Confirmation Dialog */}
+      {showSaveConfirmation && (
+        <ConfirmationDialog
+          title="분석 정보 확인"
+          message="입력된 정보가 정확한가요? 편집 버튼을 눌러 수정할 수 있습니다."
+          confirmText="저장하기"
+          cancelText="수정하기"
+          onConfirm={handleConfirmSave}
+          onCancel={handleEditFromDialog}
+          isDestructive={false}
+        />
+      )}
     </ImageBackgroundContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  // Debug styles removed
-  analysisContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 60, // Header 높이만큼 여백
-    paddingBottom: 220, // Footer 높이만큼 여백
-  },
-  header: {
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-    zIndex: 100,
-  },
-  safeAreaTop: {
-    height: StatusBar.currentHeight,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    minHeight: 48,
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    borderRadius: 20,
-    minWidth: 44,
-    minHeight: 44,
-    justifyContent: 'center',
-  },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    textAlign: 'center',
-  },
-  headerSpacer: {
-    width: 44, // Same width as back button for centering
-  },
-  editButton: {
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    minWidth: 44,
-    minHeight: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  editButtonActive: {
-    backgroundColor: '#3182F6',
-    borderColor: '#3182F6',
-  },
-  editButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#FFFFFF',
-  },
-  editButtonTextActive: {
-    color: '#FFFFFF',
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    zIndex: 100,
-  },
-  footerContent: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  safeAreaBottom: {
-    height: Platform.OS === 'ios' ? 34 : 0, // iPhone X+ home indicator space
-  },
-  saveButton: {
-    backgroundColor: '#3182F6',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 56,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  saveButtonDisabled: {
-    backgroundColor: '#94A3B8',
-    shadowOpacity: 0.1,
-    elevation: 2,
-  },
-  saveButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  saveButtonTextDisabled: {
-    color: '#E2E8F0',
-  },
-  successOverlay: {
-    position: 'absolute',
-    top: 100,
-    left: 0,
-    right: 0,
-    zIndex: 1000,
-  },
-  successMessage: {
-    marginHorizontal: 20,
-  },
-  errorOverlay: {
-    position: 'absolute',
-    top: 100,
-    left: 0,
-    right: 0,
-    zIndex: 1000,
-  },
-  errorMessage: {
-    marginHorizontal: 20,
-  },
-});

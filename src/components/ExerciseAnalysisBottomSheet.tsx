@@ -48,7 +48,11 @@ export function ExerciseAnalysisBottomSheet({
 
   const formatDuration = (duration: number) => {
     // 안전한 숫자 검증
-    if (typeof duration !== 'number' || Number.isNaN(duration) || duration < 0) {
+    if (
+      typeof duration !== 'number' ||
+      Number.isNaN(duration) ||
+      duration < 0
+    ) {
       return '시간 정보 없음';
     }
 

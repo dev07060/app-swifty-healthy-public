@@ -18,11 +18,11 @@ interface BottomSheetProps {
 
 const { height: screenHeight } = Dimensions.get('window');
 
-export function BottomSheet({ 
-  visible, 
-  onClose, 
-  children, 
-  height = screenHeight * 0.6 
+export function BottomSheet({
+  visible,
+  onClose,
+  children,
+  height = screenHeight * 0.6,
 }: BottomSheetProps) {
   const translateY = useRef(new Animated.Value(height)).current;
   const opacity = useRef(new Animated.Value(0)).current;
@@ -57,8 +57,6 @@ export function BottomSheet({
     }
   }, [visible, height, translateY, opacity]);
 
-
-
   return (
     <Modal
       visible={visible}
@@ -68,13 +66,13 @@ export function BottomSheet({
     >
       <View style={styles.overlay}>
         <Animated.View style={[styles.backdrop, { opacity }]}>
-          <TouchableOpacity 
-            style={styles.backdropTouchable} 
+          <TouchableOpacity
+            style={styles.backdropTouchable}
             onPress={onClose}
             activeOpacity={1}
           />
         </Animated.View>
-        
+
         <Animated.View
           style={[
             styles.bottomSheet,
@@ -85,9 +83,7 @@ export function BottomSheet({
           ]}
         >
           <TouchableOpacity style={styles.handle} onPress={onClose} />
-          <View style={styles.content}>
-            {children}
-          </View>
+          <View style={styles.content}>{children}</View>
         </Animated.View>
       </View>
     </Modal>

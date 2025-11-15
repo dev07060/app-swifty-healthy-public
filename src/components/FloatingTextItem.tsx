@@ -1,13 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 import {
-  View,
+  Animated,
+  Dimensions,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  Animated,
+  View,
 } from 'react-native';
-import { createFloatingTextEntrance, createPressAnimation } from '../utils/animationHelpers';
+import {
+  createFloatingTextEntrance,
+  createPressAnimation,
+} from '../utils/animationHelpers';
 
 interface FloatingTextItemProps {
   label: string;
@@ -41,9 +44,9 @@ export function FloatingTextItem({
       fadeAnim,
       scaleAnim,
       translateYAnim,
-      animationDelay
+      animationDelay,
     );
-    
+
     entranceAnimation.start();
   }, [fadeAnim, scaleAnim, translateYAnim, animationDelay]);
 
@@ -96,18 +99,12 @@ export function FloatingTextItem({
           left: safePosition.x,
           top: safePosition.y,
           opacity: fadeAnim,
-          transform: [
-            { scale: scaleAnim },
-            { translateY: translateYAnim },
-          ],
+          transform: [{ scale: scaleAnim }, { translateY: translateYAnim }],
         },
       ]}
     >
       <TouchableOpacity
-        style={[
-          styles.touchable,
-          isBeingEdited && styles.editingTouchable,
-        ]}
+        style={[styles.touchable, isBeingEdited && styles.editingTouchable]}
         onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
@@ -119,7 +116,7 @@ export function FloatingTextItem({
           <Text style={styles.value}>{value}</Text>
         </View>
         {isEditable && (
-          <Animated.View 
+          <Animated.View
             style={[
               styles.editIndicator,
               isBeingEdited && styles.editingIndicator,
@@ -129,9 +126,7 @@ export function FloatingTextItem({
               },
             ]}
           >
-            <Text style={styles.editIcon}>
-              {isBeingEdited ? '📝' : '✏️'}
-            </Text>
+            <Text style={styles.editIcon}>{isBeingEdited ? '📝' : '✏️'}</Text>
           </Animated.View>
         )}
       </TouchableOpacity>
@@ -144,7 +139,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   touchable: {
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
     borderRadius: 16,
     paddingHorizontal: 20,
     paddingVertical: 12,

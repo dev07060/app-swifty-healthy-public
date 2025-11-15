@@ -14,15 +14,30 @@ app-swifty-healthy is a mobile application that helps users monitor their health
 *   **Enhanced Analysis:** After an image is uploaded, the app presents a detailed analysis screen with insights from the Gemini API.
 *   **Recent Activity:** The main screen displays a list of recent health entries, giving users a quick overview of their latest activities.
 
+## Project Structure
+
+The project follows a clean and organized structure, with a clear separation of concerns:
+
+*   `pages/`: Defines the application's routes using a file-based routing system.
+*   `src/pages/`: Contains the screen components for each route.
+*   `src/components/`: Houses reusable UI components, such as feedback indicators and layout elements.
+*   `src/services/`: Includes API clients and services for interacting with external APIs, most notably the `GeminiAPIClient.ts` for AI-powered analysis.
+*   `src/store/`: Manages the application's client-side state using Zustand.
+*   `src/hooks/`: Contains reusable custom hooks for handling logic like image processing, async operations, and validation.
+*   `src/utils/`: Provides utility functions for various tasks, such as data transformation, error handling, and image compression.
+*   `src/types/`: Defines the TypeScript types and interfaces used throughout the application.
+
 ## Tech Stack
 
 *   **Framework:** React Native with GraniteJS
 *   **UI:** Toss Design System for React Native (`@toss/tds-react-native`)
-*   **State Management:** Zustand
-*   **AI-Powered Analysis:** Gemini API
-*   **Image Processing:** `@bam.tech/react-native-image-resizer`, `react-native-exif`
-*   **Linting:** Biome
-*   **Testing:** Jest
+*   **State Management:**
+    *   **Client State:** Zustand for simple, fast, and scalable state management.
+    *   **Server State:** TanStack Query for fetching, caching, and updating server state.
+*   **AI-Powered Analysis:** Google Gemini API for analyzing images and providing structured data.
+*   **Image Processing:** `@bam.tech/react-native-image-resizer` for resizing images and custom hooks for compression and memory management.
+*   **Linting & Formatting:** Biome for fast and efficient code linting and formatting.
+*   **Testing:** Jest for unit and integration testing.
 
 ## Getting Started
 
@@ -40,6 +55,19 @@ app-swifty-healthy is a mobile application that helps users monitor their health
     ```
 
 ## Release Notes
+
+### Version 0.0.2
+
+This release focuses on improving code quality, fixing bugs, and enhancing the user experience with a new loading animation.
+
+*   **Code Refactoring:**
+    *   Refactored the `healthTracker` store and `dataTransformers` utility to remove duplicated code and centralize business logic.
+    *   Refactored the `imageCompression` utility to eliminate redundant code for blob-to-base64 conversion.
+*   **Bug Fixes:**
+    *   Resolved several build and runtime errors related to incorrect import paths and circular dependencies in the routing setup.
+    *   Fixed case-sensitive path warnings in the `pages` directory.
+*   **UI Enhancements:**
+    *   Replaced the standard `LoadingIndicator` with a custom `GlowingView` component that provides a more engaging, multi-colored glowing animation during image analysis.
 
 ### Version 0.0.1
 

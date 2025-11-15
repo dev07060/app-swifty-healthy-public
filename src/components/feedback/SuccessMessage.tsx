@@ -1,3 +1,4 @@
+import { Button, Post } from '@toss/tds-react-native';
 import React from 'react';
 import {
   ScrollView,
@@ -5,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  type ViewStyle,
 } from 'react-native';
 import type {
   AuthenticationEntry,
@@ -17,7 +19,7 @@ interface SuccessMessageProps {
   onDismiss?: () => void;
   autoHide?: boolean;
   duration?: number;
-  style?: any;
+  style?: ViewStyle;
 }
 
 export const SuccessMessage: React.FC<SuccessMessageProps> = ({
@@ -52,9 +54,9 @@ export const SuccessMessage: React.FC<SuccessMessageProps> = ({
 
 interface DataPreviewProps {
   entry:
-    | AuthenticationEntry
-    | Omit<ExerciseEntry, 'id' | 'createdAt'>
-    | Omit<FoodEntry, 'id' | 'createdAt'>;
+  | AuthenticationEntry
+  | Omit<ExerciseEntry, 'id' | 'createdAt'>
+  | Omit<FoodEntry, 'id' | 'createdAt'>;
   onSave?: () => void;
   onDiscard?: () => void;
   isLoading?: boolean;
@@ -116,8 +118,8 @@ export const DataPreview: React.FC<DataPreviewProps> = ({
           style={styles.ingredientsContainer}
           showsVerticalScrollIndicator={false}
         >
-          {food.mainIngredients.map((ingredient, index) => (
-            <Text key={index} style={styles.ingredient}>
+          {food.mainIngredients.map((ingredient) => (
+            <Text key={ingredient} style={styles.ingredient}>
               • {ingredient}
             </Text>
           ))}
@@ -181,37 +183,24 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   cancelText = 'Cancel',
   onConfirm,
   onCancel,
-  isDestructive = false,
+  // isDestructive = false,
 }) => {
   return (
     <View style={styles.dialogOverlay}>
       <View style={styles.dialogContainer}>
-        <Text style={styles.dialogTitle}>{title}</Text>
-        <Text style={styles.dialogMessage}>{message}</Text>
-
+        <Post.H2>{title}</Post.H2>
+        <Post.Paragraph>{message}</Post.Paragraph>
         <View style={styles.dialogActions}>
-          <TouchableOpacity style={styles.dialogButton} onPress={onCancel}>
-            <Text style={styles.dialogCancelText}>{cancelText}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.dialogButton,
-              isDestructive ? styles.destructiveButton : styles.confirmButton,
-            ]}
-            onPress={onConfirm}
-          >
-            <Text
-              style={[
-                styles.dialogConfirmText,
-                isDestructive && styles.destructiveText,
-              ]}
-            >
-              {confirmText}
-            </Text>
-          </TouchableOpacity>
+          <Button type="dark" style="weak" onPress={onCancel}>
+            {cancelText}
+          </Button>
+          {/* isDestructive ? */}
+          <Button type="primary" onPress={onConfirm}>
+            {confirmText}
+          </Button>
         </View>
       </View>
-    </View>
+    </View >
   );
 };
 
@@ -379,21 +368,8 @@ const styles = StyleSheet.create({
   },
   dialogActions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     gap: 12,
-  },
-  dialogButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  confirmButton: {
-    backgroundColor: '#007AFF',
-  },
-  destructiveButton: {
-    backgroundColor: '#DC2626',
   },
   dialogCancelText: {
     fontSize: 16,

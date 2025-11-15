@@ -1,1 +1,1 @@
-export { Route } from 'pages/exercise-upload';
+export { Route } from '../src/pages/ExerciseUploadScreen';

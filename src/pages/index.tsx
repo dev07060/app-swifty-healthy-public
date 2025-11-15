@@ -1,6 +1,6 @@
 import { createRoute, useNavigation } from "@granite-js/react-native";
 import { Result } from "@toss/tds-react-native";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -8,10 +8,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { InlineError } from "../components/feedback";
 import { useHealthTrackerStore } from "../store/healthTracker";
 import type { AuthenticationEntry } from "../types";
-import { type AppError, ErrorHandlingUtils } from "../utils/errorHandling";
+import { ErrorHandlingUtils, type AppError } from "../utils/errorHandling";
 
 export const Route = createRoute("/", {
   component: MainUploadScreen,
@@ -30,6 +31,7 @@ function RecentEntryItem({
     if (isNaN(date.getTime())) {
       return "Invalid date";
     }
+    console.debug("Formatted date:", date);
     return date.toLocaleDateString("ko-KR", {
       month: "short",
       day: "numeric",
@@ -55,10 +57,10 @@ function RecentEntryItem({
       return `${entry.duration}분 • ${entry.calories}kcal 소모`;
     } else {
       const healthStatus = entry.isHealthy ? "건강함" : "주의 필요";
-      const ingredients = entry.mainIngredients && entry.mainIngredients.length > 0 
+      const mainIngredients = entry.mainIngredients && entry.mainIngredients.length > 0
         ? ` • ${entry.mainIngredients.join(", ")}`
         : "";
-      return `${entry.estimatedCalories}kcal • ${healthStatus}${ingredients}`;
+      return `${entry.estimatedCalories}kcal • ${healthStatus}${mainIngredients}`;
     }
   };
 
@@ -86,8 +88,21 @@ function MainUploadScreen() {
     // getEntriesByDateRange,
     error: storeError,
     clearError,
+    fetchTodayExerciseLogs,
+    fetchTodayFoodLogs,
+    isLoading,
   } = useHealthTrackerStore();
   const [navigationError, setNavigationError] = useState<AppError | null>(null);
+
+  const userKey = '9af9778d-cf8f-4ebd-807c-f6d4873b5fcc';
+
+  // 화면이 포커스될 때마다 당일 운동 및 식단 기록 불러오기
+  useFocusEffect(
+    useCallback(() => {
+      fetchTodayExerciseLogs(userKey);
+      fetchTodayFoodLogs(userKey);
+    }, [fetchTodayExerciseLogs, fetchTodayFoodLogs, userKey])
+  );
 
   // Get today's date in YYYY-MM-DD format (for future use)
   // const today = useMemo(() => {

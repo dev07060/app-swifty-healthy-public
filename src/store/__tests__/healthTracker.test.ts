@@ -186,11 +186,11 @@ describe('HealthTrackerStore', () => {
       const store = useHealthTrackerStore.getState();
 
       // Set an error state manually
-      useHealthTrackerStore.setState({ 
+      useHealthTrackerStore.setState({
         error: {
           type: 'validation',
-          message: 'Test error'
-        }
+          message: 'Test error',
+        },
       });
 
       store.clearError();

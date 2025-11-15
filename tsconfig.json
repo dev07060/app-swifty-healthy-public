@@ -2,7 +2,8 @@
   "compilerOptions": {
     "rootDir": ".",
     "baseUrl": "src",
-    "target": "ESNext",
+    "target": "esnext",
+    "module": "esnext",
     "moduleResolution": "bundler",
     "lib": ["ESNext"],
     "types": ["react-native"],
@@ -18,7 +19,10 @@
     "noImplicitReturns": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+
+    // 커스텀 타입 선언 파일 경로 추가
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   },
-  "include": ["**/*.ts", "**/*.tsx"]
+  "include": ["**/*.ts", "**/*.tsx", "src/types/**/*.d.ts"]
 }

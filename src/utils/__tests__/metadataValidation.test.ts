@@ -1,66 +1,85 @@
 import {
   extractDateFromText,
+  extractDateTimeFromPhoto,
   getDaysDifference,
   isDateWithinAcceptableRange,
   isSameDate,
   validateExerciseScreenshot,
+  validateFoodPhoto,
 } from '../metadataValidation';
-
-// Mock react-native-exif since it requires native linking
-jest.mock('react-native-exif', () => ({
-  getExif: jest.fn(),
-}));
 
 describe('MetadataValidation', () => {
   const mockCurrentDate = '2024-01-15';
 
-  describe('validateExerciseScreenshot', () => {
-    it('should validate screenshot with current date', () => {
-      const ocrText = `
-        Today's Workout - January 15, 2024
-        Running: 30 minutes
-        Calories burned: 300
-      `;
+  describe('validateFoodPhoto', () => {
+    it('should validate photo and return current date as fallback', async () => {
+      const result = await validateFoodPhoto('/path/to/photo.jpg');
 
-      const result = validateExerciseScreenshot(ocrText, mockCurrentDate);
+      expect(result.isValid).toBe(true);
+      expect(result.extractedDate).toBeDefined();
+    });
+
+    it('should extract date from filename if available', async () => {
+      const result = await validateFoodPhoto(
+        '/path/to/IMG_20240115_143022.jpg',
+      );
+
+      expect(result.isValid).toBe(true);
+      expect(result.extractedDate).toBe('2024-01-15');
+    });
+  });
+
+  describe('extractDateTimeFromPhoto', () => {
+    it('should extract datetime from filename pattern', async () => {
+      const result = await extractDateTimeFromPhoto(
+        '/path/to/IMG_20240115_143022.jpg',
+      );
+
+      expect(result.datetime).toBe('2024-01-15T14:30:22');
+      expect(result.error).toBeUndefined();
+    });
+
+    it('should use current time as fallback', async () => {
+      const result = await extractDateTimeFromPhoto('/path/to/photo.jpg');
+
+      expect(result.datetime).toBeDefined();
+      expect(new Date(result.datetime!).getTime()).toBeCloseTo(Date.now(), -3); // Within 1 second
+    });
+
+    it('should handle various filename patterns', async () => {
+      const testCases = [
+        {
+          path: '/path/to/20240115_143022.jpg',
+          expected: '2024-01-15T14:30:22',
+        },
+        {
+          path: '/path/to/2024-01-15_14-30-22.jpg',
+          expected: '2024-01-15T14:30:22',
+        },
+        { path: '/path/to/20240115.jpg', expected: '2024-01-15T12:00:00' },
+      ];
+
+      for (const testCase of testCases) {
+        const result = await extractDateTimeFromPhoto(testCase.path);
+        expect(result.datetime).toBe(testCase.expected);
+      }
+    });
+  });
+
+  describe('validateExerciseScreenshot', () => {
+    it('should validate screenshot with provided date', () => {
+      const result = validateExerciseScreenshot(mockCurrentDate);
 
       expect(result.isValid).toBe(true);
       expect(result.extractedDate).toBe(mockCurrentDate);
       expect(result.error).toBeUndefined();
     });
 
-    it('should reject screenshot with past date', () => {
-      const ocrText = `
-        Yesterday's Workout - January 14, 2024
-        Running: 30 minutes
-        Calories burned: 300
-      `;
+    it('should use current date as fallback', () => {
+      const result = validateExerciseScreenshot('');
 
-      const result = validateExerciseScreenshot(ocrText, mockCurrentDate);
-
-      expect(result.isValid).toBe(false);
-      expect(result.extractedDate).toBe('2024-01-14');
-      expect(result.error).toContain("Screenshot must show today's date");
-    });
-
-    it('should reject screenshot with no date found', () => {
-      const ocrText = `
-        Running workout
-        30 minutes
-        300 calories
-      `;
-
-      const result = validateExerciseScreenshot(ocrText, mockCurrentDate);
-
-      expect(result.isValid).toBe(false);
-      expect(result.error).toContain('No valid date found in screenshot');
-    });
-
-    it('should reject empty OCR text', () => {
-      const result = validateExerciseScreenshot('', mockCurrentDate);
-
-      expect(result.isValid).toBe(false);
-      expect(result.error).toContain('No text content found in screenshot');
+      expect(result.isValid).toBe(true);
+      expect(result.extractedDate).toBeDefined();
     });
   });
 

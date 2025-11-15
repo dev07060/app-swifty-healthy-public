@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Modal,
-  StyleSheet,
   Animated,
   Dimensions,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface EditableTextOverlayProps {
@@ -40,21 +40,23 @@ export function EditableTextOverlay({
 }: EditableTextOverlayProps) {
   const [inputValue, setInputValue] = useState(initialValue);
   const [selectedOption, setSelectedOption] = useState(initialValue);
-  
-  // Check if this is a calorie field
-  const isCalorieField = fieldKey === 'calories' || fieldKey === 'estimatedCalories';
-  
-  // Extract numeric value from calorie string (e.g., "250kcal" -> "250")
-  const getNumericValue = (value: string): string => {
-    if (isCalorieField) {
-      const match = value.match(/(\d+)/);
-      return match && match[1] ? match[1] : '';
-    }
-    return value;
-  };
-  
 
-  
+  // Check if this is a calorie field
+  const isCalorieField =
+    fieldKey === 'calories' || fieldKey === 'estimatedCalories';
+
+  // Extract numeric value from calorie string (e.g., "250kcal" -> "250")
+  const getNumericValue = useCallback(
+    (value: string): string => {
+      if (isCalorieField) {
+        const match = value.match(/(\d+)/);
+        return match?.[1] ? match[1] : '';
+      }
+      return value;
+    },
+    [isCalorieField],
+  );
+
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
@@ -63,9 +65,11 @@ export function EditableTextOverlay({
   // Reset input value when modal becomes visible
   useEffect(() => {
     if (visible) {
-      setInputValue(isCalorieField ? getNumericValue(initialValue) : initialValue);
+      setInputValue(
+        isCalorieField ? getNumericValue(initialValue) : initialValue,
+      );
       setSelectedOption(initialValue);
-      
+
       // Start entrance animation
       Animated.parallel([
         Animated.timing(fadeAnim, {
@@ -90,15 +94,25 @@ export function EditableTextOverlay({
       scaleAnim.setValue(0.9);
       slideAnim.setValue(50);
     }
-  }, [visible, initialValue, fadeAnim, scaleAnim, slideAnim]);
+  }, [
+    visible,
+    initialValue,
+    fadeAnim,
+    scaleAnim,
+    slideAnim,
+    isCalorieField,
+    getNumericValue,
+  ]);
 
   const handleSave = () => {
     let valueToSave = fieldType === 'multiselect' ? selectedOption : inputValue;
-    
+
     // Basic validation
     if (fieldType === 'number' && valueToSave) {
-      const numericValue = isCalorieField ? getNumericValue(valueToSave) : valueToSave;
-      if (isNaN(Number(numericValue))) {
+      const numericValue = isCalorieField
+        ? getNumericValue(valueToSave)
+        : valueToSave;
+      if (Number.isNaN(Number(numericValue))) {
         return; // Don't save invalid numbers
       }
       // For calorie fields, save the numeric value directly
@@ -106,13 +120,15 @@ export function EditableTextOverlay({
         valueToSave = numericValue;
       }
     }
-    
+
     onSave(valueToSave);
   };
 
   const handleCancel = () => {
     // Reset to initial values
-    setInputValue(isCalorieField ? getNumericValue(initialValue) : initialValue);
+    setInputValue(
+      isCalorieField ? getNumericValue(initialValue) : initialValue,
+    );
     setSelectedOption(initialValue);
     onCancel();
   };
@@ -157,10 +173,13 @@ export function EditableTextOverlay({
   };
 
   const renderMultiSelect = () => (
-    <ScrollView style={styles.optionsContainer} showsVerticalScrollIndicator={false}>
-      {options.map((option, index) => (
+    <ScrollView
+      style={styles.optionsContainer}
+      showsVerticalScrollIndicator={false}
+    >
+      {options.map((option) => (
         <TouchableOpacity
-          key={index}
+          key={option}
           style={[
             styles.optionItem,
             selectedOption === option && styles.selectedOption,
@@ -175,9 +194,7 @@ export function EditableTextOverlay({
           >
             {option}
           </Text>
-          {selectedOption === option && (
-            <Text style={styles.checkmark}>✓</Text>
-          )}
+          {selectedOption === option && <Text style={styles.checkmark}>✓</Text>}
         </TouchableOpacity>
       ))}
     </ScrollView>
@@ -199,7 +216,7 @@ export function EditableTextOverlay({
             },
           ]}
         >
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.backdropTouchable}
             onPress={handleCancel}
             activeOpacity={1}
@@ -215,25 +232,23 @@ export function EditableTextOverlay({
               styles.modalContainer,
               {
                 opacity: fadeAnim,
-                transform: [
-                  { scale: scaleAnim },
-                  { translateY: slideAnim },
-                ],
+                transform: [{ scale: scaleAnim }, { translateY: slideAnim }],
               },
             ]}
           >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{fieldLabel} 수정</Text>
               <Text style={styles.modalSubtitle}>
-                {fieldType === 'multiselect' 
-                  ? '옵션을 선택하세요' 
-                  : '새로운 값을 입력하세요'
-                }
+                {fieldType === 'multiselect'
+                  ? '옵션을 선택하세요'
+                  : '새로운 값을 입력하세요'}
               </Text>
             </View>
 
             <View style={styles.modalContent}>
-              {fieldType === 'multiselect' ? renderMultiSelect() : renderTextInput()}
+              {fieldType === 'multiselect'
+                ? renderMultiSelect()
+                : renderTextInput()}
             </View>
 
             <View style={styles.modalActions}>
@@ -243,7 +258,7 @@ export function EditableTextOverlay({
               >
                 <Text style={styles.cancelButtonText}>취소</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={[styles.actionButton, styles.saveButton]}
                 onPress={handleSave}

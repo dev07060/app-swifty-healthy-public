@@ -73,7 +73,7 @@ export function ExerciseRequirementsBottomSheet({
           <View style={styles.warningContent}>
             <Text style={styles.warningTitle}>주의사항</Text>
             <Text style={styles.warningText}>
-              위 요구사항이 충족되지 않은 이미지는 분석에 실패할 수 있습니다. 
+              위 요구사항이 충족되지 않은 이미지는 분석에 실패할 수 있습니다.
             </Text>
           </View>
         </View>
@@ -87,7 +87,7 @@ export function ExerciseRequirementsBottomSheet({
               취소
             </Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             style={[styles.button, styles.proceedButton]}
             onPress={onProceed}

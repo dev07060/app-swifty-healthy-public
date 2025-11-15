@@ -12,22 +12,18 @@ import {
 import {
   ErrorMessage,
   LoadingIndicator,
-  ProgressIndicator,
-  SuccessMessage,
-} from '../components/feedback';
+  SuccessMessage
+} from '../components';
 
-import { ExerciseRequirementsBottomSheet } from '../components/ExerciseRequirementsBottomSheet';
-import { useImageUpload, useValidation } from '../hooks/useAsyncOperation';
-import {
-  useImageMemoryMonitor,
-} from '../hooks/useImageProcessing';
+import { ExerciseRequirementsBottomSheet } from '../components';
+import { useAsyncOperation, useValidation } from '../hooks/useAsyncOperation';
+import { useImageMemoryMonitor } from '../hooks/useImageProcessing';
 import { useImageSelection } from '../hooks/useImageSelection';
-import { geminiAPIClient } from '../services/GeminiAPIClient';
+import { geminiAPIClient } from '../services';
 import { useAnalysisNavigationStore } from '../store/analysisNavigation';
-// Remove unused imports since save logic moved to enhanced analysis screen
-import { ErrorHandlingUtils } from '../utils/errorHandling';
+import type { GeminiExerciseResponse } from '../types';
+import { ErrorHandlingUtils, type AppError } from '../utils/errorHandling';
 import { compressImage } from '../utils/imageCompression';
-import { validateExerciseScreenshot } from '../utils/metadataValidation';
 
 // @ts-ignore - Granite routing type issue
 export const Route = createRoute('/exercise-upload', {
@@ -35,12 +31,12 @@ export const Route = createRoute('/exercise-upload', {
 });
 
 function ExerciseUploadScreen() {
-  const navigation = Route.useNavigation();
   const enhancedNavigation = useNavigation();
   const { setNavigationData } = useAnalysisNavigationStore();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showSuccess] = useState(false);
-  const [showRequirementsBottomSheet, setShowRequirementsBottomSheet] = useState(false);
+  const [showRequirementsBottomSheet, setShowRequirementsBottomSheet] =
+    useState(false);
   // Remove old analysis result state since we now use enhanced analysis screen
 
   // Image processing hooks
@@ -52,7 +48,7 @@ function ExerciseUploadScreen() {
       return true;
     },
     {
-      onError: (error) => {
+      onError: (error: any) => {
         ErrorHandlingUtils.logError(error, 'Exercise screenshot validation');
       },
     },
@@ -60,49 +56,38 @@ function ExerciseUploadScreen() {
 
   // Remove health tracker store usage since save logic moved to enhanced analysis screen
 
-  // Image upload with progress tracking
-  const imageUpload = useImageUpload(
+  // Image analysis with progress tracking
+  const imageUpload = useAsyncOperation<GeminiExerciseResponse>(
     async (imageUri: string) => {
-      await validation.validate(imageUri);
       const result = await geminiAPIClient.analyzeExerciseScreenshot(imageUri);
-
-      // Validate the extracted date
-      const dateValidation = validateExerciseScreenshot(result.date);
-      if (!dateValidation.isValid) {
-        throw new Error(dateValidation.error || 'Date validation failed');
-      }
-
       return result;
     },
     {
-      onSuccess: (result) => {
+      onSuccess: (result: GeminiExerciseResponse) => {
         // Store navigation data and navigate to enhanced analysis screen
         setNavigationData({
           imageUri: selectedImage!,
           analysisResult: result,
-          entryType: 'exercise'
+          entryType: 'exercise',
         });
         enhancedNavigation.push('/enhanced-analysis' as any);
       },
-      onError: (error) => {
+      onError: (error: AppError) => {
         ErrorHandlingUtils.logError(error, 'Exercise image analysis');
       },
     },
   );
 
-
-
-  const handleGoBack = () => {
-    navigation.goBack();
-  };
-
   // 이미지 선택 훅 사용
   const { showImageSelectionDialog } = useImageSelection({
-    onImageSelected: useCallback((imageUri: string) => {
-      setSelectedImage(imageUri);
-      validation.reset();
-      imageUpload.reset();
-    }, [validation, imageUpload]),
+    onImageSelected: useCallback(
+      (imageUri: string) => {
+        setSelectedImage(imageUri);
+        validation.reset();
+        imageUpload.reset();
+      },
+      [validation, imageUpload],
+    ),
     onError: useCallback((_error: any) => {
       // 에러는 이미 훅 내부에서 처리됨
     }, []),
@@ -178,15 +163,11 @@ function ExerciseUploadScreen() {
       );
       ErrorHandlingUtils.logError(appError, 'processImage', error);
 
-      Alert.alert(
-        '분석 실패',
-        ErrorHandlingUtils.formatUserMessage(appError),
-        [{ text: '확인' }]
-      );
+      Alert.alert('분석 실패', ErrorHandlingUtils.formatUserMessage(appError), [
+        { text: '확인' },
+      ]);
     }
   };
-
-
 
   const handleDiscard = () => {
     setSelectedImage(null);
@@ -205,10 +186,6 @@ function ExerciseUploadScreen() {
     validation.reset();
   };
 
-
-
-
-
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
@@ -226,9 +203,11 @@ function ExerciseUploadScreen() {
               onPress={showImageSelectionDialog}
               disabled={imageUpload.isLoading}
             >
-              <Text style={styles.imagePickerIcon}>📱</Text>
-              <Text style={styles.imagePickerText}>스크린샷 선택</Text>
-              <Text style={styles.imagePickerSubtext}>카메라 또는 갤러리</Text>
+              <Text style={styles.imagePickerText}>운동 인증 입력</Text>
+              <Text style={styles.imagePickerIcon}>🥎⚽🏀</Text>
+              <Text style={styles.imagePickerSubtext}>
+                클릭하여 촬영 또는 갤러리에서 선택하기
+              </Text>
             </TouchableOpacity>
           </View>
         )}
@@ -264,12 +243,7 @@ function ExerciseUploadScreen() {
         )}
 
         {imageUpload.isLoading && (
-          <>
-            <LoadingIndicator message="스크린샷 분석 중..." />
-            {imageUpload.progress > 0 && (
-              <ProgressIndicator progress={imageUpload.progress / 100} />
-            )}
-          </>
+          <LoadingIndicator message="스크린샷 분석 중..." />
         )}
 
         {validation.error && (
@@ -277,25 +251,40 @@ function ExerciseUploadScreen() {
         )}
 
         {imageUpload.error && (
-          <ErrorMessage error={imageUpload.error} onRetry={handleRetryAnalysis} />
+          <ErrorMessage
+            error={imageUpload.error}
+            onRetry={handleRetryAnalysis}
+          />
         )}
 
         {/* Analysis results are now handled in enhanced analysis screen */}
 
         {showSuccess && <SuccessMessage message="저장되었습니다!" />}
 
-        <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+        {/* <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
           <Text style={styles.backButtonText}>← 돌아가기</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
-
+      {/* <BoardRow
+        title={"운동 시간을 적어주세요."}
+      >
+        <Post.Paragraph paddingBottom={24} typography="t6">
+          주식 거래가 실시간이 아니기 때문에 가격이 변할 것에 대비하는 금액을 말해요.
+        </Post.Paragraph>
+        <Post.Ul paddingBottom={24} typography="t6">
+          <Post.Li>
+            대시를 붙이고 띄어쓰면 불렛을 쓸 수 있어요.
+            <Post.Ul paddingBottom={24} typography="t6">
+              <Post.Li>들여쓰려면 대시 앞에 〉를 입력해요.</Post.Li>
+            </Post.Ul>
+          </Post.Li>
+        </Post.Ul>
+      </BoardRow> */}
       <ExerciseRequirementsBottomSheet
         visible={showRequirementsBottomSheet}
         onClose={handleCloseRequirements}
         onProceed={handleProceedWithAnalysis}
       />
-
-
     </ScrollView>
   );
 }

@@ -35,13 +35,12 @@ const validateConfig = (): void => {
 // Create typed configuration object
 export const appConfig: AppConfig = {
   // API Configuration
-  API_BASE_URL: Config.API_BASE_URL || 'https://api.example.com',
+  API_BASE_URL: Config.API_BASE_URL || 'http://127.0.0.1:8000',
   API_KEY: Config.API_KEY || '',
 
   // Gemini API Configuration
-
-  GEMINI_API_KEY: Config.GEMINI_API_KEY || '',
-  GEMINI_API_URL: Config.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent',
+  GEMINI_API_KEY: 'AIzaSyBc6I25huwj2BXNLC4g6xoj_XFjs3KBOrI',
+  GEMINI_API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent',
 
   // App Configuration
   APP_ENV:

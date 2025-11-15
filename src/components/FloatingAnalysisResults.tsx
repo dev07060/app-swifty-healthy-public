@@ -1,17 +1,17 @@
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
-import { EditableTextOverlay } from './EditableTextOverlay';
-import type { GeminiFoodResponse, GeminiExerciseResponse } from '../types';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import type { GeminiExerciseResponse, GeminiFoodResponse } from '../types';
 import {
-  mapAnalysisToFloatingText,
   getEditableFields,
+  mapAnalysisToFloatingText,
 } from '../utils/analysisDataMapper';
 import {
-  validateEditedField,
+  getFieldLabel,
   getFieldOptions,
   getFieldType,
-  getFieldLabel,
+  validateEditedField,
 } from '../utils/editValidation';
+import { EditableTextOverlay } from './EditableTextOverlay';
 
 interface FloatingAnalysisResultsProps {
   analysisData: GeminiFoodResponse | GeminiExerciseResponse;
@@ -38,7 +38,11 @@ export function FloatingAnalysisResults({
   // Remove animation code
   // Convert analysis data to floating text items using the mapper
   const textItems = useMemo(() => {
-    return mapAnalysisToFloatingText(analysisData, entryType);
+    console.log('🎨 FloatingAnalysisResults - Entry Type:', entryType);
+    console.log('🎨 FloatingAnalysisResults - Analysis Data:', JSON.stringify(analysisData, null, 2));
+    const items = mapAnalysisToFloatingText(analysisData, entryType);
+    console.log('🎨 FloatingAnalysisResults - Mapped Items:', JSON.stringify(items, null, 2));
+    return items;
   }, [analysisData, entryType]);
 
   // Get editable fields for this entry type
@@ -64,8 +68,12 @@ export function FloatingAnalysisResults({
     if (!editingField) return;
 
     // Validate the new value
-    const validation = validateEditedField(editingField.key, newValue, entryType);
-    
+    const validation = validateEditedField(
+      editingField.key,
+      newValue,
+      entryType,
+    );
+
     if (!validation.isValid) {
       if (onValidationError && validation.error) {
         onValidationError(validation.error);
@@ -75,10 +83,10 @@ export function FloatingAnalysisResults({
 
     // Use sanitized value if available
     const finalValue = validation.sanitizedValue || newValue;
-    
+
     // Update the data
     onItemEdit(editingField.key, finalValue);
-    
+
     // Close modal and reset editing state
     setIsEditModalVisible(false);
     setEditingField(null);
@@ -144,7 +152,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   resultItem: {
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
     borderRadius: 16,
     paddingHorizontal: 24,
     paddingVertical: 16,
