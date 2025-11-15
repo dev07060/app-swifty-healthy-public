@@ -8,9 +8,7 @@
   // --- 1. 120자 텍스트 제한 ---
   "editor.wordWrap": "bounded", // 'wordWrapColumn' 기준으로 줄 바꿈
   "editor.wordWrapColumn": 120, // 줄 바꿈 기준을 120자로 설정
-  "editor.rulers": [
-    120
-  ], // 120자 위치에 세로줄(눈금자) 표시
+  "editor.rulers": [120], // 120자 위치에 세로줄(눈금자) 표시
 
   // --- 2 & 3. 저장 시 자동 포맷 및 import 정리 ---
   "editor.formatOnSave": true, // 저장 시 자동으로 코드 포맷팅

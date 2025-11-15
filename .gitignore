@@ -20,3 +20,5 @@ docs/**
 
 .kiro/
 .idea/
+updates/
+swifty-backend-api/
