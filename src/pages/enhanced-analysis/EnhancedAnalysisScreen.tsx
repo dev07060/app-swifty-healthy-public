@@ -92,6 +92,11 @@ export function EnhancedAnalysisScreen({
     const userKey = '9af9778d-cf8f-4ebd-807c-f6d4873b5fcc';
 
     try {
+      // Get today's date in YYYY-MM-DD format (Korean timezone)
+      const now = new Date();
+      const koreanDate = new Date(now.getTime() + (9 * 60 * 60 * 1000)); // UTC+9
+      const todayDate = koreanDate.toISOString().split('T')[0] as string;
+
       if (entryType === 'food') {
         const foodData = modifiedData as GeminiFoodResponse;
         const payload = {
@@ -100,7 +105,7 @@ export function EnhancedAnalysisScreen({
           ingredients: foodData.ingredients,
           estimatedCalories: foodData.estimatedCalories,
           mealType: foodData.mealType,
-          date: foodData.date,
+          date: todayDate,
         };
         console.log('💾 Saving food data - Modified Data:', JSON.stringify(foodData, null, 2));
         console.log('💾 Saving food data - Ingredients:', foodData.ingredients);
@@ -114,7 +119,7 @@ export function EnhancedAnalysisScreen({
           duration: exerciseData.duration,
           calories: exerciseData.calories,
           distance: exerciseData.distance,
-          date: exerciseData.date,
+          date: todayDate,
         });
       }
 
