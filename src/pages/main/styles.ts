@@ -7,7 +7,7 @@ export const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
-    alignItems: "center",
+    alignItems: "flex-start",
     marginBottom: 24,
     paddingTop: 20,
   },
@@ -18,6 +18,8 @@ export const styles = StyleSheet.create({
   },
   actionSection: {
     marginBottom: 24,
+    flexDirection: "row",
+    gap: 12,
   },
   sectionTitle: {
     fontSize: 18,
@@ -26,15 +28,28 @@ export const styles = StyleSheet.create({
     marginBottom: 12,
   },
   actionButton: {
+    flex: 1,
+    aspectRatio: 1,
     backgroundColor: "white",
-    padding: 16,
+    padding: 18,
     borderRadius: 8,
-    marginBottom: 12,
+    justifyContent: "space-between",
   },
   actionButtonText: {
     fontSize: 18,
     fontWeight: "600",
     color: "#1A202C",
+    alignSelf: "flex-start",
+  },
+    actionButtonSubText: {
+    fontSize: 14,
+    fontWeight: "400",
+    color: "#444546FF",
+    alignSelf: "flex-start",
+  },
+  actionButtonEmoji: {
+    fontSize: 64,
+    alignSelf: "flex-end",
   },
   recentEntriesSection: {
     marginBottom: 24,

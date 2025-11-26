@@ -32,55 +32,61 @@ export function RecentEntryItem({ entry, isLast = false, isExpanded, onToggle }:
 
   const getEntryTitle = (entry: AuthenticationEntry) => {
     if (entry.type === "exercise") {
-      return entry.exerciseType || "운동";
+      return entry.exerciseType ?? "운동";
     } else {
-      return entry.mealType || "식사";
+      return entry.mealType ?? "식사";
     }
   };
 
   const getEntrySummary = (entry: AuthenticationEntry) => {
     if (entry.type === "exercise") {
-      return `${entry.duration}분 • ${entry.calories}kcal 소모`;
+      const duration = entry.duration ?? 0;
+      const calories = entry.calories ?? 0;
+      return `${duration}분 • ${calories}kcal 소모`;
     } else {
-      return `${entry.estimatedCalories}kcal • ${entry.isHealthy ? "건강함" : "주의 필요"}`;
+      const calories = entry.estimatedCalories ?? 0;
+      const healthStatus = entry.isHealthy ? "건강함" : "주의 필요";
+      return `${calories}kcal • ${healthStatus}`;
     }
   };
 
   const getEntryDetails = (entry: AuthenticationEntry) => {
     if (entry.type === "exercise") {
+      const duration = entry.duration ?? 0;
+      const calories = entry.calories ?? 0;
+      const distance = entry.distance;
+      
       return (
         <View style={styles.detailsContainer}>
           <Text style={styles.detailLabel}>
-            운동 시간: <Text style={styles.detailValue}>{entry.duration}분</Text>
+            운동 시간: <Text style={styles.detailValue}>{duration}분</Text>
           </Text>
           <Text style={styles.detailLabel}>
-            소모 칼로리: <Text style={styles.detailValue}>{entry.calories}kcal</Text>
+            소모 칼로리: <Text style={styles.detailValue}>{calories}kcal</Text>
           </Text>
-          {entry.distance && (
+          {distance != null && distance > 0 && (
             <Text style={styles.detailLabel}>
-              거리: <Text style={styles.detailValue}>{entry.distance}km</Text>
+              거리: <Text style={styles.detailValue}>{distance}km</Text>
             </Text>
           )}
         </View>
       );
     } else {
+      const calories = entry.estimatedCalories ?? 0;
+      const healthStatus = entry.isHealthy ? "건강함 ✅" : "주의 필요 ⚠️";
+      const ingredients = entry.mainIngredients?.filter(Boolean) ?? [];
+      
       return (
         <View style={styles.detailsContainer}>
           <Text style={styles.detailLabel}>
-            칼로리: <Text style={styles.detailValue}>{entry.estimatedCalories}kcal</Text>
+            칼로리: <Text style={styles.detailValue}>{calories}kcal</Text>
           </Text>
           <Text style={styles.detailLabel}>
-            건강도:{" "}
-            <Text style={styles.detailValue}>
-              {entry.isHealthy ? "건강함 ✅" : "주의 필요 ⚠️"}
-            </Text>
+            건강도: <Text style={styles.detailValue}>{healthStatus}</Text>
           </Text>
-          {entry.mainIngredients && entry.mainIngredients.length > 0 && (
+          {ingredients.length > 0 && (
             <Text style={styles.detailLabel}>
-              주요 재료:{" "}
-              <Text style={styles.detailValue}>
-                {entry.mainIngredients.join(", ")}
-              </Text>
+              주요 재료: <Text style={styles.detailValue}>{ingredients.join(", ")}</Text>
             </Text>
           )}
         </View>

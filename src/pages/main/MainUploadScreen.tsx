@@ -78,7 +78,8 @@ export function MainUploadScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>건강 트래커</Text>
+        <Text style={styles.title}>00님,</Text>
+        <Text style={styles.title}>오늘의 인증을 작성해볼까요?</Text>
       </View>
 
       {navigationError && (
@@ -93,6 +94,8 @@ export function MainUploadScreen() {
           onPress={navigateToExerciseUpload}
         >
           <Text style={styles.actionButtonText}>운동 인증</Text>
+          <Text style={styles.actionButtonSubText}>오늘 했던 나의 운동을 캡쳐해서 인증하기</Text>
+          <Text style={styles.actionButtonEmoji}>🏃‍♂️</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -100,6 +103,8 @@ export function MainUploadScreen() {
           onPress={navigateToFoodUpload}
         >
           <Text style={styles.actionButtonText}>식단 인증</Text>
+                    <Text style={styles.actionButtonSubText}>오늘 먹은 음식을 업로드해서 기록해보세요</Text>
+          <Text style={styles.actionButtonEmoji}>🥗</Text>
         </TouchableOpacity>
       </View>
 
