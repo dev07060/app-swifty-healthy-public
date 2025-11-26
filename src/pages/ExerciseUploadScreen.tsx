@@ -19,7 +19,7 @@ import { ExerciseRequirementsBottomSheet } from '../components';
 import { useAsyncOperation, useValidation } from '../hooks/useAsyncOperation';
 import { useImageMemoryMonitor } from '../hooks/useImageProcessing';
 import { useImageSelection } from '../hooks/useImageSelection';
-import { geminiAPIClient } from '../services';
+import { getAnalysisService } from '../services/AnalysisServiceFactory';
 import { useAnalysisNavigationStore } from '../store/analysisNavigation';
 import type { GeminiExerciseResponse } from '../types';
 import { ErrorHandlingUtils, type AppError } from '../utils/errorHandling';
@@ -59,7 +59,7 @@ function ExerciseUploadScreen() {
   // Image analysis with progress tracking
   const imageUpload = useAsyncOperation<GeminiExerciseResponse>(
     async (imageUri: string) => {
-      const result = await geminiAPIClient.analyzeExerciseScreenshot(imageUri);
+      const result = await getAnalysisService().analyzeExerciseScreenshot(imageUri);
       return result;
     },
     {

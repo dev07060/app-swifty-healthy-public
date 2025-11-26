@@ -11,14 +11,15 @@ yarn-error.log
 !.yarn/sdks
 !.yarn/versions
 
-docs/**
 .env
 .granite
 .swc
-.DS_Store
+**/.DS_Store
 *.ait
+.hypothesis
 
 .kiro/
 .idea/
-updates/
+# updates/
+docs/**
 swifty-backend-api/

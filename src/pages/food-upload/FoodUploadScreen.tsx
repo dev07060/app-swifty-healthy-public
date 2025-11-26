@@ -12,7 +12,7 @@ import {
 import { useImageUpload, useValidation } from '../../hooks/useAsyncOperation';
 import { useImageMemoryMonitor } from '../../hooks/useImageProcessing';
 import { useImageSelection } from '../../hooks/useImageSelection';
-import { geminiAPIClient } from '../../services/GeminiAPIClient';
+import { getAnalysisService } from '../../services/AnalysisServiceFactory';
 import { useAnalysisNavigationStore } from '../../store/analysisNavigation';
 import type { GeminiFoodResponse } from '../../types';
 import { AppError, ErrorHandlingUtils } from '../../utils/errorHandling';
@@ -43,7 +43,7 @@ export function FoodUploadScreen(): React.JSX.Element {
   const imageUpload = useImageUpload(
     async (imageUri: string) => {
       await validation.validate(imageUri);
-      const result = await geminiAPIClient.analyzeFoodPhoto(imageUri);
+      const result = await getAnalysisService().analyzeFoodPhoto(imageUri);
       return result;
     },
     {

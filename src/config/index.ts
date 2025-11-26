@@ -19,6 +19,7 @@ interface AppConfig {
   // Feature Flags
   ENABLE_ANALYTICS: boolean;
   ENABLE_CRASH_REPORTING: boolean;
+  USE_BACKEND_ANALYSIS: boolean;
 }
 
 // Parse boolean values from environment strings
@@ -51,6 +52,7 @@ export const appConfig: AppConfig = {
   // Feature Flags
   ENABLE_ANALYTICS: parseBoolean(Config.ENABLE_ANALYTICS),
   ENABLE_CRASH_REPORTING: parseBoolean(Config.ENABLE_CRASH_REPORTING),
+  USE_BACKEND_ANALYSIS: parseBoolean(Config.USE_BACKEND_ANALYSIS || 'false'),
 };
 
 // Validate configuration on import
@@ -75,6 +77,7 @@ export const appSettings = {
 export const featureFlags = {
   analytics: appConfig.ENABLE_ANALYTICS,
   crashReporting: appConfig.ENABLE_CRASH_REPORTING,
+  useBackendAnalysis: appConfig.USE_BACKEND_ANALYSIS,
 };
 
 // Helper functions
