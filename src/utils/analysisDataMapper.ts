@@ -6,6 +6,7 @@ export interface AnalysisDisplayConfig {
   key: string;
   label: string;
   formatter: (value: any) => string;
+  unit?: string; // Explicit unit definition
   priority: number; // Higher priority items are shown first
   isEditable: boolean;
   preferredPosition?: Position;
@@ -36,6 +37,7 @@ const FOOD_DISPLAY_CONFIG: AnalysisDisplayConfig[] = [
     key: 'estimatedCalories',
     label: '칼로리',
     formatter: (value: number) => `${value}kcal`,
+    unit: 'kcal',
     priority: 8,
     isEditable: true,
   },
@@ -54,6 +56,7 @@ const EXERCISE_DISPLAY_CONFIG: AnalysisDisplayConfig[] = [
     key: 'duration',
     label: '운동 시간',
     formatter: (value: number) => `${value}분`,
+    unit: '분',
     priority: 9,
     isEditable: true,
   },
@@ -61,6 +64,7 @@ const EXERCISE_DISPLAY_CONFIG: AnalysisDisplayConfig[] = [
     key: 'calories',
     label: '소모 칼로리',
     formatter: (value: number) => `${value}kcal`,
+    unit: 'kcal',
     priority: 8,
     isEditable: true,
   },
@@ -68,6 +72,7 @@ const EXERCISE_DISPLAY_CONFIG: AnalysisDisplayConfig[] = [
     key: 'distance',
     label: '운동 거리',
     formatter: (value: number) => `${value}km`,
+    unit: 'km',
     priority: 7,
     isEditable: true,
   },

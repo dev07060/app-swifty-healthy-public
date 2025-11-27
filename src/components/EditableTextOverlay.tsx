@@ -19,6 +19,7 @@ interface EditableTextOverlayProps {
   fieldType: 'text' | 'number' | 'multiselect';
   fieldLabel: string;
   fieldKey?: string; // Add field key to identify calorie fields
+  unit?: string; // Add unit prop
   options?: string[]; // For multiselect type
   onSave: (value: string) => void;
   onCancel: () => void;
@@ -33,6 +34,7 @@ export function EditableTextOverlay({
   fieldType,
   fieldLabel,
   fieldKey,
+  unit,
   options = [],
   onSave,
   onCancel,
@@ -41,20 +43,17 @@ export function EditableTextOverlay({
   const [inputValue, setInputValue] = useState(initialValue);
   const [selectedOption, setSelectedOption] = useState(initialValue);
 
-  // Check if this is a calorie field
-  const isCalorieField =
-    fieldKey === 'calories' || fieldKey === 'estimatedCalories';
-
-  // Extract numeric value from calorie string (e.g., "250kcal" -> "250")
+  // Extract numeric value from string with unit
   const getNumericValue = useCallback(
     (value: string): string => {
-      if (isCalorieField) {
-        const match = value.match(/(\d+)/);
+      if (unit) {
+        const cleanedValue = value.replace(unit, '').trim();
+        const match = cleanedValue.match(/(\d+(\.\d+)?)/); // Allow for decimal numbers
         return match?.[1] ? match[1] : '';
       }
       return value;
     },
-    [isCalorieField],
+    [unit],
   );
 
   // Animation values
@@ -66,7 +65,7 @@ export function EditableTextOverlay({
   useEffect(() => {
     if (visible) {
       setInputValue(
-        isCalorieField ? getNumericValue(initialValue) : initialValue,
+        unit ? getNumericValue(initialValue) : initialValue,
       );
       setSelectedOption(initialValue);
 
@@ -100,7 +99,7 @@ export function EditableTextOverlay({
     fadeAnim,
     scaleAnim,
     slideAnim,
-    isCalorieField,
+    unit,
     getNumericValue,
   ]);
 
@@ -109,14 +108,14 @@ export function EditableTextOverlay({
 
     // Basic validation
     if (fieldType === 'number' && valueToSave) {
-      const numericValue = isCalorieField
+      const numericValue = unit
         ? getNumericValue(valueToSave)
         : valueToSave;
       if (Number.isNaN(Number(numericValue))) {
         return; // Don't save invalid numbers
       }
-      // For calorie fields, save the numeric value directly
-      if (isCalorieField) {
+      // For fields with units, save the numeric value directly
+      if (unit) {
         valueToSave = numericValue;
       }
     }
@@ -127,22 +126,22 @@ export function EditableTextOverlay({
   const handleCancel = () => {
     // Reset to initial values
     setInputValue(
-      isCalorieField ? getNumericValue(initialValue) : initialValue,
+      unit ? getNumericValue(initialValue) : initialValue,
     );
     setSelectedOption(initialValue);
     onCancel();
   };
 
   const renderTextInput = () => {
-    if (isCalorieField) {
+    if (unit) {
       return (
-        <View style={styles.calorieInputContainer}>
+        <View style={styles.inputWithUnitContainer}>
           <TextInput
-            style={styles.calorieInput}
+            style={styles.numericInput}
             value={inputValue}
             onChangeText={(text) => {
-              // Only allow numeric input for calorie fields
-              const numericText = text.replace(/\D/g, '');
+              // Only allow numeric input for fields with units
+              const numericText = text.replace(/[^0-9.]/g, ''); // Allow decimal numbers
               setInputValue(numericText);
             }}
             placeholder="0"
@@ -151,7 +150,7 @@ export function EditableTextOverlay({
             autoFocus={true}
             selectTextOnFocus={true}
           />
-          <Text style={styles.calorieUnit}>kcal</Text>
+          <Text style={styles.unitText}>{unit}</Text>
         </View>
       );
     }
@@ -402,7 +401,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#FFFFFF',
   },
-  calorieInputContainer: {
+  inputWithUnitContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
@@ -411,14 +410,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#F7FAFC',
     minHeight: 48,
   },
-  calorieInput: {
+  numericInput: {
     flex: 1,
     padding: 12,
     fontSize: 16,
     color: '#1A202C',
     textAlign: 'right',
   },
-  calorieUnit: {
+  unitText: {
     paddingRight: 12,
     fontSize: 16,
     color: '#718096',

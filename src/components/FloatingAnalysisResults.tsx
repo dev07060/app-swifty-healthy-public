@@ -4,6 +4,7 @@ import type { GeminiExerciseResponse, GeminiFoodResponse } from '../types';
 import {
   getEditableFields,
   mapAnalysisToFloatingText,
+  getFieldConfig,
 } from '../utils/analysisDataMapper';
 import {
   getFieldLabel,
@@ -34,6 +35,7 @@ export function FloatingAnalysisResults({
     key: string;
     value: string;
     label: string;
+    unit?: string;
   } | null>(null);
   // Remove animation code
   // Convert analysis data to floating text items using the mapper
@@ -54,11 +56,15 @@ export function FloatingAnalysisResults({
 
   const handleItemPress = (key: string, currentValue: string) => {
     if (isEditing && editableFields.includes(key)) {
+      const fieldConfig = getFieldConfig(key, entryType);
+      const unit = fieldConfig?.unit;
+
       // Open edit modal
       setEditingField({
         key,
         value: currentValue,
         label: getFieldLabel(key),
+        unit,
       });
       setIsEditModalVisible(true);
     }
@@ -130,6 +136,7 @@ export function FloatingAnalysisResults({
           fieldType={getFieldType(editingField.key)}
           fieldLabel={editingField.label}
           fieldKey={editingField.key}
+          unit={editingField.unit}
           options={getFieldOptions(editingField.key, entryType)}
           onSave={handleEditSave}
           onCancel={handleEditCancel}
