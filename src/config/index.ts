@@ -36,7 +36,7 @@ const validateConfig = (): void => {
 // Create typed configuration object
 export const appConfig: AppConfig = {
   // API Configuration
-  API_BASE_URL: Config.API_BASE_URL || 'http://127.0.0.1:8000',
+  API_BASE_URL: Config.API_BASE_URL || 'https://swifty-backend-api-433284349510.asia-northeast3.run.app',
   API_KEY: Config.API_KEY || '',
 
   // Gemini API Configuration

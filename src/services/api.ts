@@ -1,6 +1,7 @@
 import type { ExerciseEntry, FoodEntry } from '../types';
 
-const API_BASE_URL = 'http://localhost:8000';
+// Use environment variable if available, fallback to production URL
+const API_BASE_URL = process.env.API_BASE_URL || 'https://swifty-backend-api-udeke3xipq-du.a.run.app';
 
 export interface ExerciseLogResponse {
   id: number;
@@ -49,7 +50,7 @@ export const apiService = {
       duration: log.duration ?? 0,
       calories: log.calories ?? 0,
       distance: log.distance ?? 0,
-      date: log.date ?? new Date().toISOString().split('T')[0],
+      date: (log.date || new Date().toISOString().split('T')[0]) as string,
       createdAt: log.createdAt,
       timestamp: log.createdAt,
     }));
@@ -74,7 +75,7 @@ export const apiService = {
       estimatedCalories: log.estimatedCalories ?? 0,
       mealType: log.mealType ?? '',
       mainIngredients: log.ingredients.map((ing) => ing.name),
-      date: log.date ?? new Date().toISOString().split('T')[0],
+      date: (log.date || new Date().toISOString().split('T')[0]) as string,
       createdAt: log.createdAt,
       timestamp: log.createdAt,
     }));

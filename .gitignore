@@ -20,6 +20,6 @@ yarn-error.log
 
 .kiro/
 .idea/
-# updates/
+updates/
 docs/**
 swifty-backend-api/
