@@ -4,7 +4,9 @@ import { LoginScreen } from "./login/LoginScreen";
 import { MainUploadScreen } from "./main/MainUploadScreen";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // TODO: Set to false for production
+  // Currently set to true to bypass login for development of other features
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   if (!isLoggedIn) {
     return <LoginScreen onLoginSuccess={() => setIsLoggedIn(true)} />;
